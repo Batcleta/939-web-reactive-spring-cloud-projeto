@@ -1,8 +1,6 @@
 package tech.ada.user.controller;
 
 import org.springframework.http.MediaType;
-import tech.ada.pagamento.model.Test;
-import tech.ada.user.exception.UserNotFoundException;
 import tech.ada.user.model.User;
 import tech.ada.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -63,13 +61,13 @@ public class UserController {
             .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
 
-    @PostMapping(value = "/pagamentos", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<Comprovante> pagamento(@RequestBody Comprovante comprovante) {
-        comprovante.setAck_usuario(true);
-        /// pegar os objetos, mudar os dados e salvar
-        // pegar o valor e diminuir de pagador e aumentar do recebedor e salvar
-        return Mono.just(comprovante).log();
-    }
+//    @PostMapping(value = "/pagamentos", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public Mono<Comprovante> pagamento(@RequestBody Comprovante comprovante) {
+//        comprovante.setAck_usuario(true);
+//        /// pegar os objetos, mudar os dados e salvar
+//        // pegar o valor e diminuir de pagador e aumentar do recebedor e salvar
+//        return Mono.just(comprovante).log();
+//    }
 
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<Void>> remover(@PathVariable String id) {
