@@ -1,7 +1,7 @@
 package tech.ada.user.service;
 
-import org.springframework.http.ResponseEntity;
-import tech.ada.user.exception.UserNotFoundException;
+import lombok.extern.slf4j.Slf4j;
+import tech.ada.user.controller.Comprovante;
 import tech.ada.user.model.User;
 import tech.ada.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -10,9 +10,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@Slf4j
 public class UserService {
 
     private UserRepository repository;
@@ -31,14 +31,14 @@ public class UserService {
 
     public Mono<User> atualizar(User user, String id) {
         return repository.findById(id)
-            .flatMap( atual -> repository.save(atual.update(user)));
+                .flatMap( atual -> repository.save(atual.update(user)));
     }
 
     public Mono<?> remover(String id) {
         return repository.findById(id)
-            .switchIfEmpty(Mono.error(new RuntimeException("user not found id " + id)))
-            .flatMap(u -> repository.deleteById(id))
-            .then();
+                .switchIfEmpty(Mono.error(new RuntimeException("user not found id " + id)))
+                .flatMap(u -> repository.deleteById(id))
+                .then();
     }
 
     public Mono<User> buscarPorId(String id) {
@@ -47,6 +47,21 @@ public class UserService {
 
     public Flux<User> buscarPorUsernames(String ... users) {
         return repository.findByUsernameIn(Arrays.asList(users));
+    }
+
+    public Mono<Comprovante> atualizar(Comprovante comp) {
+        Flux<User> users = this.buscarPorUsernames(comp.getParamsUsers());
+        return users.zipWith(users.skip(1))
+                .map(tupla -> {
+                    User pagador = tupla.getT1();
+                    User recebedor = tupla.getT2();
+                    pagador.pay(recebedor, comp);
+                    return List.of(pagador, recebedor);
+                })
+                .flatMap(lista -> {
+                    return repository.saveAll(lista);
+                })
+                .then(Mono.just(comp));
     }
 
 }

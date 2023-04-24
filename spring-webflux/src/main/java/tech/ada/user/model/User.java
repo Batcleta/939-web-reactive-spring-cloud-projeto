@@ -5,12 +5,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import tech.ada.user.controller.Comprovante;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 @Document
 public class User {
@@ -23,6 +23,18 @@ public class User {
     private List<String> roles;
     private Long birth;
     private LocalDate since;
+    private Double balance;
+
+    public User pay(User user, Comprovante comprovante) {
+        this.balance -= comprovante.getValor();
+        user.balance += comprovante.getValor();
+        comprovante.setAck_usuario(true);
+        return this;
+    }
+
+    public User() {
+        this.balance = 0.0;
+    }
 
     public User update(User usuario) {
         // id, username and since not permited changing
