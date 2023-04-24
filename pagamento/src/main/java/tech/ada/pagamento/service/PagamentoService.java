@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import tech.ada.pagamento.Exception.GetSomeMoney;
 import tech.ada.pagamento.model.*;
 import tech.ada.pagamento.repository.TransacaoRepository;
 
@@ -28,8 +29,11 @@ public class PagamentoService {
                         .build())
                 .retrieve().bodyToFlux(Usuario.class);
 
-        usuarios.flatMap(u -> {
-            log.error(u.getUsername() + " : " + u.getBalance());
+
+        usuarios.next().map(u -> {
+            if (u.getBalance() < pagamento.getValor()) {
+                throw new GetSomeMoney("Saldo insuficiente");
+            }
             return null;
         });
 
@@ -48,6 +52,7 @@ public class PagamentoService {
         return comprovanteMono;
     }
 
+
     private Mono<Comprovante> salvar(Comprovante cmp) {
         WebClient webClient = WebClient.create("http://localhost:8080");
         Mono<Comprovante> monoComprovante = webClient.post()
@@ -55,7 +60,7 @@ public class PagamentoService {
                         .path("/users/pagamentos")
                         .build())
                 .bodyValue(cmp)
-                .retrieve().bodyToMono( Comprovante.class);
+                .retrieve().bodyToMono(Comprovante.class);
 
         return monoComprovante;
     }
@@ -64,8 +69,8 @@ public class PagamentoService {
         int a = 1_000_000_000;
         int b = 2_000_000_000;
         int c = (a + b) / 2;
-        System.out.println( c );
-        System.out.println((a+b)>>>1);
+        System.out.println(c);
+        System.out.println((a + b) >>> 1);
     }
 
 }
