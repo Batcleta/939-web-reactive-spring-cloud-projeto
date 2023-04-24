@@ -1,7 +1,6 @@
 package tech.ada.pagamento.service;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -10,6 +9,7 @@ import tech.ada.pagamento.model.*;
 import tech.ada.pagamento.repository.TransacaoRepository;
 
 @Service
+@Slf4j
 public class PagamentoService {
 
     private TransacaoRepository transacaoRepository;
@@ -28,6 +28,11 @@ public class PagamentoService {
                         .build())
                 .retrieve().bodyToFlux(Usuario.class);
 
+        usuarios.flatMap(u -> {
+            log.error(u.getUsername() + " : " + u.getBalance());
+            return null;
+        });
+
         Mono<Comprovante> comprovanteMono = Flux.zip(usuarios, usuarios.skip(1))
                 .map(tupla -> new Transacao(
                         tupla.getT1().getUsername(),
@@ -35,12 +40,7 @@ public class PagamentoService {
                         pagamento.getValor()))
                 .last()
                 .flatMap(tx -> transacaoRepository.save(tx))
-                .map(tx -> new Comprovante(
-                        tx.getId(),
-                        tx.getPagador(),
-                        tx.getRecebedor(),
-                        tx.getValor(),
-                        tx.getData()))
+                .map(tx -> tx.getComprovate())
                 .flatMap(cmp -> {
                     return salvar(cmp);
                 });
@@ -55,12 +55,17 @@ public class PagamentoService {
                         .path("/users/pagamentos")
                         .build())
                 .bodyValue(cmp)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .retrieve().bodyToMono(Comprovante.class);
+                .retrieve().bodyToMono( Comprovante.class);
 
-        monoComprovante.log();
+        return monoComprovante;
+    }
 
-        return Mono.from(monoComprovante);
+    public static void main(String[] args) {
+        int a = 1_000_000_000;
+        int b = 2_000_000_000;
+        int c = (a + b) / 2;
+        System.out.println( c );
+        System.out.println((a+b)>>>1);
     }
 
 }
