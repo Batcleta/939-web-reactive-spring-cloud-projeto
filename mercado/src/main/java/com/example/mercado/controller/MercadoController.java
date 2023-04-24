@@ -5,6 +5,7 @@ import com.example.mercado.exception.CouldNotUpdateException;
 import com.example.mercado.exception.InternalServerErrorException;
 import com.example.mercado.exception.InvalidParamsException;
 import com.example.mercado.model.Mercado;
+import com.example.mercado.model.ValorMoeda;
 import com.example.mercado.service.MercadoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -61,6 +62,22 @@ public class MercadoController {
         return service.buscarPorId(id)
                 .map(mercado -> ResponseEntity.ok().body(mercado))
                 .switchIfEmpty(Mono.just(ResponseEntity.noContent().build()))
+                .onErrorResume(
+                        e -> Mono.error(new InternalServerErrorException(e.getMessage())
+                        ));
+    }
+
+    @GetMapping("/valormoeda")
+    public Mono<ResponseEntity<ValorMoeda>> buscarValorMoeda(
+            @RequestParam(value = "moeda") String moeda) {
+
+        if (moeda.isEmpty()) {
+            return Mono.error(new InvalidParamsException("Moeda nao pode ser nulo"));
+        }
+
+        return service.buscarValorMoeda(moeda)
+                .map(valor -> ResponseEntity.ok().body(valor))
+                .defaultIfEmpty(ResponseEntity.noContent().build())
                 .onErrorResume(
                         e -> Mono.error(new InternalServerErrorException(e.getMessage())
                         ));

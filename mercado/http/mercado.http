@@ -23,6 +23,10 @@ Content-Type: application/json
 GET http://localhost:8060/mercados/nomes?nome=bitcoin
 Content-Type: application/json
 
+### Buscar Valor moeda
+GET http://localhost:8060/mercados/valormoeda?moeda=USD
+Content-Type: application/json
+
 ### Deletar por id
 DELETE http://localhost:8060/mercados/643ddb5cf4f6631b1a458629
 Content-Type: application/json
