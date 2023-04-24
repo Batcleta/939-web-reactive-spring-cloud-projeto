@@ -31,7 +31,7 @@ public class UserService {
 
     public Mono<User> atualizar(User user, String id) {
         return repository.findById(id)
-                .flatMap( atual -> repository.save(atual.update(user)));
+                .flatMap(atual -> repository.save(atual.update(user)));
     }
 
     public Mono<?> remover(String id) {
@@ -45,7 +45,7 @@ public class UserService {
         return repository.findById(id);
     }
 
-    public Flux<User> buscarPorUsernames(String ... users) {
+    public Flux<User> buscarPorUsernames(String... users) {
         return repository.findByUsernameIn(Arrays.asList(users));
     }
 

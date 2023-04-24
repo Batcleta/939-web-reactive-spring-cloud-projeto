@@ -5,29 +5,40 @@ import com.example.mercado.exception.CouldNotUpdateException;
 import com.example.mercado.exception.InternalServerErrorException;
 import com.example.mercado.exception.InvalidParamsException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class MercadoExceptionHandler {
+
     @ExceptionHandler(CouldNotCreateException.class)
-    public ResponseEntity<String> handleNotCreatedException(CouldNotCreateException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    public ProblemDetail handleNotCreatedException(CouldNotCreateException e) {
+        var problemDetails = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), e.getMessage());
+        problemDetails.setTitle("RunTime Exception - Could not create");
+        return problemDetails;
     }
 
     @ExceptionHandler(InvalidParamsException.class)
-    public ResponseEntity<String> handleInvalidParamsException(InvalidParamsException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    public ProblemDetail handleInvalidParamsException(InvalidParamsException e) {
+        var problemDetails = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), e.getMessage());
+        problemDetails.setTitle("RunTime Exception - Invalid Params");
+        return problemDetails;
     }
 
     @ExceptionHandler(CouldNotUpdateException.class)
-    public ResponseEntity<String> handleNotUpdatedException(CouldNotUpdateException e) {
-        return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT).body(e.getMessage());
+    public ProblemDetail handleNotUpdatedException(CouldNotUpdateException e) {
+        var problemDetails = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(418), e.getMessage());
+        problemDetails.setTitle("RunTime Exception - Could not update");
+        return problemDetails;
     }
 
     @ExceptionHandler(InternalServerErrorException.class)
-    public ResponseEntity<String> handleInternalServerException(InternalServerErrorException e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    public ProblemDetail handleInternalServerException(InternalServerErrorException e) {
+        var problemDetails = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), e.getMessage());
+        problemDetails.setTitle("RunTime Exception - Internal Server Error");
+        return problemDetails;
     }
 }

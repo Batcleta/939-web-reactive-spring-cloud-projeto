@@ -6,6 +6,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import tech.ada.pagamento.Exception.GetSomeMoney;
+import tech.ada.pagamento.Exception.UserNotFoundException;
 import tech.ada.pagamento.model.*;
 import tech.ada.pagamento.repository.TransacaoRepository;
 
@@ -22,20 +23,21 @@ public class PagamentoService {
     public Mono<Comprovante> pagar(Pagamento pagamento) {
 
         WebClient webClient = WebClient.create("http://localhost:8080");
+
         Flux<Usuario> usuarios = webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/users/usernames") // http://..users/usernames?users=bob,alice
+                        .path("/users/usernames")
                         .queryParam("users", pagamento.getParamUsuarios())
                         .build())
-                .retrieve().bodyToFlux(Usuario.class);
+                .retrieve().bodyToFlux(Usuario.class)
+                .flatMap(usuario -> {
+                    if (usuario.getBalance() < pagamento.getValor()) {
+                        return Mono.error(new GetSomeMoney("Saldo insuficiente"));
+                    }
+                    return Mono.just(usuario);
+                })
+                .switchIfEmpty(Mono.error(new UserNotFoundException("Usuário não encontrado")));
 
-
-        usuarios.next().map(u -> {
-            if (u.getBalance() < pagamento.getValor()) {
-                throw new GetSomeMoney("Saldo insuficiente");
-            }
-            return null;
-        });
 
         Mono<Comprovante> comprovanteMono = Flux.zip(usuarios, usuarios.skip(1))
                 .map(tupla -> new Transacao(

@@ -1,12 +1,11 @@
 package tech.ada.pagamento.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import tech.ada.pagamento.Exception.GetSomeMoney;
+import tech.ada.pagamento.Exception.UserNotFoundException;
 
 @RestControllerAdvice
 public class PagamentoExceptionHandler {
@@ -19,9 +18,17 @@ public class PagamentoExceptionHandler {
     }
 
     @ExceptionHandler(GetSomeMoney.class)
-    public ResponseEntity<String> handleNotCreatedException(GetSomeMoney e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    public ProblemDetail handleInsuficientFoundsException(GetSomeMoney e) {
+        var problemDetails = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), e.getMessage());
+        problemDetails.setTitle("RunTime Exception - Insuficient founds");
+        return problemDetails;
+
     }
 
-    // TODO implementar para user not found .. status 404
+    @ExceptionHandler(UserNotFoundException.class)
+    public ProblemDetail handleUserNotFoundException(UserNotFoundException e) {
+        var problemDetails = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(404), e.getMessage());
+        problemDetails.setTitle("RunTime Exception - User Not Found");
+        return problemDetails;
+    }
 }
