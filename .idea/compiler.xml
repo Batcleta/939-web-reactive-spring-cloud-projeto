@@ -13,12 +13,6 @@
         <module name="mercado" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="ada-966-webflux" target="17" />
-      <module name="mercado" target="17" />
-      <module name="pagamento" target="17" />
-      <module name="spring-mvc" target="17" />
-    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">

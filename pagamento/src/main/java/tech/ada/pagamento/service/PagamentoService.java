@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
 import tech.ada.pagamento.Exception.GetSomeMoney;
 import tech.ada.pagamento.Exception.UserNotFoundException;
 import tech.ada.pagamento.model.*;
@@ -30,20 +31,19 @@ public class PagamentoService {
                         .queryParam("users", pagamento.getParamUsuarios())
                         .build())
                 .retrieve().bodyToFlux(Usuario.class)
-                .flatMap(usuario -> {
-                    if (usuario.getBalance() < pagamento.getValor()) {
-                        return Mono.error(new GetSomeMoney("Saldo insuficiente"));
-                    }
-                    return Mono.just(usuario);
-                })
                 .switchIfEmpty(Mono.error(new UserNotFoundException("Usuário não encontrado")));
 
 
         Mono<Comprovante> comprovanteMono = Flux.zip(usuarios, usuarios.skip(1))
-                .map(tupla -> new Transacao(
-                        tupla.getT1().getUsername(),
-                        tupla.getT2().getUsername(),
-                        pagamento.getValor()))
+                .map(tupla -> {
+                    if (tupla.getT1().getBalance() < pagamento.getValor()) {
+                        Mono.error(new GetSomeMoney("Saldo insuficiente"));
+                    }
+                    return new Transacao(
+                            tupla.getT1().getUsername(),
+                            tupla.getT2().getUsername(),
+                            pagamento.getValor());
+                })
                 .last()
                 .flatMap(tx -> transacaoRepository.save(tx))
                 .map(tx -> tx.getComprovate())

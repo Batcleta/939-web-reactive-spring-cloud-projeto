@@ -2,7 +2,9 @@
 POST http://localhost:8080/users
 Content-Type: application/json
 
-< ./post-fred-mercury.json
+#< ./post-fred-mercury.json
+#< ./post-leo-santana.json
+< ./post-michael-jordan.json
 
 ### listar
 GET http://localhost:8080/users

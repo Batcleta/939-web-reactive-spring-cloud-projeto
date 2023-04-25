@@ -1,7 +1,7 @@
 {
   "id" : "8f98sdf9s8f8s9d8fsf",
-  "pagador" : "fredm",
-  "recebedor" : "leos",
+  "pagador" : "leos",
+  "recebedor" : "fredm",
   "valor" : 50,
   "data" : "",
   "ack_usuario" : false
