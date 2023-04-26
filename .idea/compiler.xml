@@ -8,6 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="spring-mvc" />
+        <module name="spring-gateway-zuul" />
         <module name="pagamento" />
         <module name="ada-966-webflux" />
         <module name="mercado" />
